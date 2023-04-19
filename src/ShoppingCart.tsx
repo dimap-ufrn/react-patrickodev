@@ -15,6 +15,10 @@ export interface CartItem {
   
 const ShoppingCart: React.FC<Props> = ({ items }) => {
   const [cartItems, setCartItems] = useState<CartItem[]>(items); // Estado para armazenar os itens do carrinho
+  const [cep, setCep] = useState('');
+
+  const [cidade, setCidade] = useState('');
+  const [estado, setEstado] = useState('');
 
   const handleAddToCart = (itemId: number) => {
     const updatedCartItems = cartItems.map(item => {
@@ -62,11 +66,48 @@ const ShoppingCart: React.FC<Props> = ({ items }) => {
     return totalQuantity;
   };
 
+  const handleCepChange = (event: { target: { value: any; }; }) => {
+    const { value } = event.target;
+    // Remove caracteres não numéricos do valor do CEP
+    const numericValue = value.replace(/\D/g, '');
+
+    // Limita o valor do CEP a 8 dígitos
+    const limitedValue = numericValue.slice(0, 8);
+
+    // Atualiza o estado com o valor do CEP limitado a 8 dígitos
+    setCep(limitedValue);
+  };
+
+  const fetchAddressFromCep = async () => {
+    try {
+      const response = await fetch(`https://viacep.com.br/ws/${cep}/json/`);
+      const data = await response.json();
+  
+      // Verifica se a resposta da API possui cidade e estado
+      if (data.localidade && data.uf) {
+        // Atualiza os estados cidade e estado com os dados obtidos da API
+        setCidade(data.localidade);
+        setEstado(data.uf);
+      } else {
+        // Caso não haja cidade e estado na resposta da API,
+        // exibe mensagem de erro para o usuário
+        alert('CEP não encontrado. Por favor, verifique o CEP informado.');
+      }
+    } catch (error) {
+      // Caso ocorra algum erro na chamada à API,
+      // exibe mensagem de erro para o usuário
+      alert('Ocorreu um erro na consulta do CEP. Por favor, tente novamente.');
+    }
+  };
+  
+
   return (
     <div className="shopping-cart">
       <ul className="cart-items">
       <h1 className="cart-header">Carrinho de compras</h1>
-      <h2>Você tem {calculateTotalQuantity()} itens </h2>
+      {calculateTotalQuantity() === 0 ? <h2>O carrinho está vazio</h2> : <h2>Você tem {calculateTotalQuantity()} 
+      {calculateTotalQuantity() === 1 ? ' item' : ' itens'}</h2>}
+      
       {cartItems.map(item => (
         <li key={item.id} className="cart-item">
           <img src={item.image} alt={item.name} className="cart-item-image" />
@@ -85,8 +126,18 @@ const ShoppingCart: React.FC<Props> = ({ items }) => {
     <ul>
     <p className="cart-total">
       <h2>Resumo</h2>
+      <input
+          type="text"
+          value={cep}
+          maxLength={8} // Define o máximo de caracteres como 8
+          onChange={handleCepChange}
+          placeholder="Informe seu CEP"
+        />
+        <button onClick={fetchAddressFromCep}>Calcular Frete</button>
+
         <p className="cart-total-label">Total:</p>
         <p className="cart-total-value">R${calculateTotal().toFixed(2)}</p>
+        <button className="cart-final-button">Fechar pedido</button>
       </p>
     </ul>
 </div>

@@ -76,6 +76,7 @@
 }
 
 .cart-total {
+  background-color: #2430db;  
   margin-top: 20px;
   font-size: 24px;
   font-weight: bold;
@@ -83,4 +84,11 @@
 
 .cart-total-label {
   margin-right: 10px;
+}
+
+.cart-final-button{
+  padding: 50px;
+  border: dark;
+  background-color: #959bf1;
+  cursor: pointer;
 }
