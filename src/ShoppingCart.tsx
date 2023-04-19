@@ -16,8 +16,9 @@ export interface CartItem {
 const ShoppingCart: React.FC<Props> = ({ items }) => {
   const [cartItems, setCartItems] = useState<CartItem[]>(items); // Estado para armazenar os itens do carrinho
   const [cep, setCep] = useState('');
-
   const [ddd, setDDD] = useState('');
+  const [localidade, setLocalidade] = useState('');
+  const [uf, setUf] = useState('');
 
   const handleAddToCart = (itemId: number) => {
     const updatedCartItems = cartItems.map(item => {
@@ -53,6 +54,7 @@ const ShoppingCart: React.FC<Props> = ({ items }) => {
     return item.price * item.quantity;
   };
 
+  //para ir somando os itens no cartItems e acumular o valor total do carrinho
   const calculateTotal = () => {
     return cartItems.reduce((total, item) => total + calculateSubtotal(item), 0);
   };
@@ -83,9 +85,11 @@ const ShoppingCart: React.FC<Props> = ({ items }) => {
       const data = await response.json();
       
       // Verifica se a resposta da API possui cidade e estado
-      if (data.localidade && data.uf) {
-        // Atualiza os estados cidade e estado com os dados obtidos da API
+      if (data.ddd && data.uf && data.localidade) {
+        // Atualiza o parametro com o dado obtido da API
         setDDD(data.ddd);
+        setLocalidade(data.localidade);
+        setUf(data.uf);
       
       } else {
         // Caso não haja cidade e estado na resposta da API,
@@ -150,6 +154,7 @@ const ShoppingCart: React.FC<Props> = ({ items }) => {
           placeholder="Informe seu CEP"
         />
         <button onClick={fetchAddressFromCep}>Calcular Frete</button>
+        <p className="cart-item-details">{localidade} - {uf}</p>
         <p> Valor do frete: R${calculateFrete()}</p>
         <p className="cart-total-value">Itens ({calculateTotalQuantity()}) R${calculateTotal().toFixed(2)}</p>
         <p className="cart-total-value">Frete R${calculateFrete()}</p>

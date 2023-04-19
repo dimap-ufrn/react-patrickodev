@@ -40,6 +40,7 @@
 
 .cart-item-details {
   flex: 1;
+  font-size: 18px;
 }
 
 .cart-item-name {
