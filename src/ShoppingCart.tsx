@@ -17,8 +17,7 @@ const ShoppingCart: React.FC<Props> = ({ items }) => {
   const [cartItems, setCartItems] = useState<CartItem[]>(items); // Estado para armazenar os itens do carrinho
   const [cep, setCep] = useState('');
 
-  const [cidade, setCidade] = useState('');
-  const [estado, setEstado] = useState('');
+  const [ddd, setDDD] = useState('');
 
   const handleAddToCart = (itemId: number) => {
     const updatedCartItems = cartItems.map(item => {
@@ -82,12 +81,12 @@ const ShoppingCart: React.FC<Props> = ({ items }) => {
     try {
       const response = await fetch(`https://viacep.com.br/ws/${cep}/json/`);
       const data = await response.json();
-  
+      
       // Verifica se a resposta da API possui cidade e estado
       if (data.localidade && data.uf) {
         // Atualiza os estados cidade e estado com os dados obtidos da API
-        setCidade(data.localidade);
-        setEstado(data.uf);
+        setDDD(data.ddd);
+      
       } else {
         // Caso não haja cidade e estado na resposta da API,
         // exibe mensagem de erro para o usuário
@@ -100,6 +99,23 @@ const ShoppingCart: React.FC<Props> = ({ items }) => {
     }
   };
   
+  const calculateFrete = () =>{
+    const dddInt = parseInt(ddd);
+
+    // Calcula a diferença entre o DDD do CEP e 84
+    const diferenca = dddInt - 84;
+
+    // Verifica se a diferença é negativa e multiplica por -1 se for o caso
+    const cepCalculado = diferenca < 0 ? (diferenca * -1) : diferenca;
+
+    return cepCalculado;
+
+  }
+  
+  const freteValue = calculateFrete();
+  const productValue = calculateTotal();
+  const orderValue = freteValue + productValue;
+  console.log("total: ", productValue ," - frete: ", freteValue )
 
   return (
     <div className="shopping-cart">
@@ -134,9 +150,10 @@ const ShoppingCart: React.FC<Props> = ({ items }) => {
           placeholder="Informe seu CEP"
         />
         <button onClick={fetchAddressFromCep}>Calcular Frete</button>
-
-        <p className="cart-total-label">Total:</p>
-        <p className="cart-total-value">R${calculateTotal().toFixed(2)}</p>
+        <p> Valor do frete: R${calculateFrete()}</p>
+        <p className="cart-total-value">Itens ({calculateTotalQuantity()}) R${calculateTotal().toFixed(2)}</p>
+        <p className="cart-total-value">Frete R${calculateFrete()}</p>
+        <p className="cart-total-label">Total: R${orderValue.toFixed(2)}</p>
         <button className="cart-final-button">Fechar pedido</button>
       </p>
     </ul>
